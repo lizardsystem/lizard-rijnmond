@@ -4,15 +4,14 @@ from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 from django.contrib import admin
 
-from lizard_ui.urls import debugmode_urlpatterns
+from lizard_rijnmond.views import segment_map
 
 admin.autodiscover()
 
 urlpatterns = patterns(
     '',
     (r'^admin/', include(admin.site.urls)),
-    # url(r'^something/',
-    #     direct.import.views.some_method,
-    #     name="name_it"),
+    url(r'^$',
+        segment_map,
+        name="segment_map"),
     )
-urlpatterns += debugmode_urlpatterns()

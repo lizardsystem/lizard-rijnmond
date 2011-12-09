@@ -1,5 +1,6 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
 from django.contrib.gis.db import models
+from django.contrib import admin
 from django.utils.translation import ugettext as _
 
 TIME_MAPPING = (
@@ -57,6 +58,9 @@ class Measure(models.Model):
                             null=True,
                             blank=True)
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         verbose_name = _('Measure')
         verbose_name_plural = _('Measures')
@@ -72,6 +76,14 @@ class Result(models.Model):
                                 blank=True,
                                 null=True)
 
+    def __unicode__(self):
+        return u'Result for %s at %s' % (self.measure, self.time)
+
     class Meta:
         verbose_name = _('Result')
         verbose_name_plural = _('Results')
+
+
+admin.site.register(Result)
+admin.site.register(Measure)
+admin.site.register(Segment)

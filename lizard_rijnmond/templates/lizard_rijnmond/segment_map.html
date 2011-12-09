@@ -1,0 +1,18 @@
+{% extends "lizard_map/wms.html" %}
+{% load workspaces i18n %}
+
+{% block sidebar %}
+<div class="sidebarbox sidebarbox-stretched">
+  <h2>{% trans "Measures" %}</h2>
+  <ul class="without-bullets pane">
+    {% for measure in measures %}
+    <li>{{ measure.name }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% for workspace in workspaces.user %}
+  {% workspace workspace 0 %}
+{% empty %}
+No workspaces yet
+{% endfor %}
+{% endblock %}
