@@ -2,8 +2,8 @@
 from django.contrib.gis.db import models
 
 
-class Area(models.Model):
-    """Areas from area shapefile (*dijkringen*).
+class Segment(models.Model):
+    """Segments from segment shapefile (dike segments).
 
     Columns from the .dbf::
 
@@ -18,7 +18,7 @@ class Area(models.Model):
         WV21_WEL,N,19,11
 
     The ``mapping`` attribute on this class maps the column names to our
-    fields. Used by the import_areas management command.
+    fields. Used by the import_segments management command.
 
     """
     mapping = {

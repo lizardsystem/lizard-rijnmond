@@ -43,7 +43,7 @@ setup(name='lizard-rijnmond',
           'console_scripts': [
           ],
         'lizard_map.adapter_class': [
-            'adapter_rijnmond_areas = lizard_rijnmond.layers:AreaAdapter',
+            'adapter_rijnmond_segments = lizard_rijnmond.layers:SegmentAdapter',
             ],
           },
       )

@@ -10,10 +10,10 @@ from lizard_map.models import Workspace
 from lizard_map.models import WorkspaceItem
 from osgeo import ogr
 
-from lizard_rijnmond.models import Area
+from lizard_rijnmond.models import Segment
 
-AREA_WORKSPACE_ID = 3
-AREA_WORKSPACE_ITEM_ID = 3
+SEGMENT_WORKSPACE_ID = 3
+SEGMENT_WORKSPACE_ITEM_ID = 3
 SOURCE_ENCODING = "windows-1252"
 
 logger = logging.getLogger(__name__)
@@ -32,13 +32,13 @@ def load_shapefile(shapefile_filename):
     layer = source.GetLayer()
     feature = layer.next()
     field_indices = {}
-    for field_name, column_name in Area.mapping.items():
+    for field_name, column_name in Segment.mapping.items():
         field_indices[field_name] = feature.GetFieldIndex(column_name)
     layer.ResetReading()
 
-    if Area.objects.count():
-        logger.info("First deleting the existing areas...")
-        Area.objects.all().delete()
+    if Segment.objects.count():
+        logger.info("First deleting the existing segments...")
+        Segment.objects.all().delete()
 
     number_of_features = 0
     for feature in layer:
@@ -52,25 +52,25 @@ def load_shapefile(shapefile_filename):
 
             kwargs[field_name] = codecs.decode(feature.GetField(index),
                                                SOURCE_ENCODING)
-        area = Area(**kwargs)
-        area.save()
+        segment = Segment(**kwargs)
+        segment.save()
         number_of_features += 1
-    logger.info("Added %s areas", number_of_features)
+    logger.info("Added %s segments", number_of_features)
 
 
 def setup_special_workspaces():
-    Workspace.objects.filter(pk=AREA_WORKSPACE_ID).delete()
+    Workspace.objects.filter(pk=SEGMENT_WORKSPACE_ID).delete()
     workspace = Workspace(
-        id=AREA_WORKSPACE_ID,
+        id=SEGMENT_WORKSPACE_ID,
         name="Riviersegmenten")
     workspace.save()
-    WorkspaceItem.objects.filter(pk=AREA_WORKSPACE_ITEM_ID).delete()
+    WorkspaceItem.objects.filter(pk=SEGMENT_WORKSPACE_ITEM_ID).delete()
     workspace_item = WorkspaceItem(
-        id=AREA_WORKSPACE_ITEM_ID,
-        adapter_class='adapter_rijnmond_areas',
+        id=SEGMENT_WORKSPACE_ITEM_ID,
+        adapter_class='adapter_rijnmond_segments',
         workspace=workspace)
     workspace_item.save()
-    logger.info("Added special workspace for rijnmond areas.")
+    logger.info("Added special workspace for rijnmond segments.")
 
 
 class Command(BaseCommand):

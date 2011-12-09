@@ -9,10 +9,10 @@ import mapnik
 logger = logging.getLogger(__name__)
 
 
-class AreaAdapter(WorkspaceItemAdapter):
+class SegmentAdapter(WorkspaceItemAdapter):
 
     def __init__(self, *args, **kwargs):
-        super(AreaAdapter, self).__init__(*args, **kwargs)
+        super(SegmentAdapter, self).__init__(*args, **kwargs)
 
     def layer(self, layer_ids=None, request=None):
         """Return mapnik layers and styles."""
@@ -20,7 +20,7 @@ class AreaAdapter(WorkspaceItemAdapter):
         styles = {}
 
         style = mapnik.Style()
-        styles["areaadapterstyle"] = style
+        styles["segmentadapterstyle"] = style
 
         rule = mapnik.Rule()
         symbol = mapnik.LineSymbolizer(mapnik.Color(255, 100, 100), 4)
@@ -28,8 +28,8 @@ class AreaAdapter(WorkspaceItemAdapter):
         style.rules.append(rule)
 
         query = """(
-            select area.the_geom
-            from lizard_rijnmond_area area
+            select segment.the_geom
+            from lizard_rijnmond_segment segment
         ) as data"""
         default_database = settings.DATABASES['default']
         datasource = mapnik.PostGIS(
@@ -40,9 +40,9 @@ class AreaAdapter(WorkspaceItemAdapter):
             table=query,
             )
 
-        layer = mapnik.Layer("Areas", RD)
+        layer = mapnik.Layer("Segments", RD)
         layer.datasource = datasource
-        layer.styles.append("areaadapterstyle")
+        layer.styles.append("segmentadapterstyle")
         layers.append(layer)
 
         return layers, styles
