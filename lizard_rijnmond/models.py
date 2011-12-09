@@ -1,11 +1,16 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
 from django.contrib.gis.db import models
+from django.utils.translation import ugettext as _
+
+TIME_MAPPING = (
+    (50, '2050'),
+    (100, '2100'))
 
 
 class Segment(models.Model):
     """Segments from segment shapefile (dike segments).
 
-    Columns from the .dbf::
+    Columns from the ``.dbf``::
 
         LENGTH,N,13,11
         CATEGORIE,C,128
@@ -38,3 +43,35 @@ class Segment(models.Model):
 
     the_geom = models.LineStringField(srid=4326)
     objects = models.GeoManager()
+
+    class Meta:
+        verbose_name = _('Dike segment')
+        verbose_name_plural = _('Dike segments')
+
+
+class Measure(models.Model):
+    code = models.CharField(max_length=50,
+                            null=True,
+                            blank=True)
+    name = models.CharField(max_length=128,
+                            null=True,
+                            blank=True)
+
+    class Meta:
+        verbose_name = _('Measure')
+        verbose_name_plural = _('Measures')
+
+
+class Result(models.Model):
+    time = models.IntegerField(
+        choices=TIME_MAPPING,
+        verbose_name=_('Future date for which the result was calculated'),
+        blank=True,
+        null=True)
+    measure = models.ForeignKey(Measure,
+                                blank=True,
+                                null=True)
+
+    class Meta:
+        verbose_name = _('Result')
+        verbose_name_plural = _('Results')
