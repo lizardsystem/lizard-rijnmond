@@ -21,20 +21,20 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
-    option_list += make_option(
-            '--flush',
-            '-f',
-            action='store_true',
-            dest='flush',
-            default=False,
-            help='Delete all previously imported data first.'),
-    option_list += make_option(
-            '--missing-only',
-            '-m',
-            action='store_true',
-            dest='missing_only',
-            default=False,
-            help='Import only missing files.'),
+    # option_list += make_option(
+    #         '--flush',
+    #         '-f',
+    #         action='store_true',
+    #         dest='flush',
+    #         default=False,
+    #         help='Delete all previously imported data first.'),
+    # option_list += make_option(
+    #         '--missing-only',
+    #         '-m',
+    #         action='store_true',
+    #         dest='missing_only',
+    #         default=False,
+    #         help='Import only missing files.'),
     args = ''
     help = ('Import data from the thredds server into the database, ' +
             'replacing imports for which a newer file is on thredds and ' +
@@ -44,7 +44,8 @@ class Command(BaseCommand):
         """Perform the actual import."""
         catalog_root = settings.SEGMENTS_CATALOG_ROOT
         data_root = settings.THREDDS_DATA_ROOT
-        if options.get("flush"):
+        # if options.get("flush"):
+        if True:
             print "Flushing all previous imports from database..."
             Result.objects.all().delete()
             Measure.objects.all().delete()
@@ -60,7 +61,7 @@ class Command(BaseCommand):
         for measure_url in measure_urls:
             netcdf = client.open_url(measure_url)
             code = netcdf.measure.code
-            name = netcdf.measure.name
+            name = netcdf.measure['name']
             measure = Measure(code=code, name=name)
             measure.save()
             print "Added measure", name
