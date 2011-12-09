@@ -3,17 +3,17 @@
 import logging
 import codecs
 
-from osgeo import ogr
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.management.base import BaseCommand
 from lizard_map import coordinates
-# from lizard_map.models import Workspace
-# from lizard_map.models import WorkspaceItem
+from lizard_map.models import Workspace
+from lizard_map.models import WorkspaceItem
+from osgeo import ogr
 
 from lizard_rijnmond.models import Area
-# from deltaportaal.views import RIVERMAP_WORKSPACE_ID
-# from deltaportaal.views import RIVERMAP_WORKSPACE_ITEM_ID
 
+AREA_WORKSPACE_ID = 3
+AREA_WORKSPACE_ITEM_ID = 3
 SOURCE_ENCODING = "windows-1252"
 
 logger = logging.getLogger(__name__)
@@ -58,25 +58,19 @@ def load_shapefile(shapefile_filename):
     logger.info("Added %s areas", number_of_features)
 
 
-# def setup_special_workspaces():
-#     Workspace.objects.filter(pk=RIVERMAP_WORKSPACE_ID).delete()
-#     workspace = Workspace(
-#         id=RIVERMAP_WORKSPACE_ID,
-#         name="Riviersegmenten")
-#     workspace.save()
-#     WorkspaceItem.objects.filter(pk=RIVERMAP_WORKSPACE_ITEM_ID).delete()
-#     WorkspaceItem.objects.filter(pk=RIVERMAP_WORKSPACE_ITEM_ID + 1).delete()
-#     workspace_item = WorkspaceItem(
-#         id=RIVERMAP_WORKSPACE_ITEM_ID,
-#         adapter_class='adapter_riverpoint',
-#         workspace=workspace)
-#     workspace_item.save()
-#     workspace_item2 = WorkspaceItem(
-#         id=RIVERMAP_WORKSPACE_ITEM_ID + 1,
-#         adapter_class='selected_measures',
-#         workspace=workspace)
-#     workspace_item2.save()
-#     logger.info("Added special workspace for river segments.")
+def setup_special_workspaces():
+    Workspace.objects.filter(pk=AREA_WORKSPACE_ID).delete()
+    workspace = Workspace(
+        id=AREA_WORKSPACE_ID,
+        name="Riviersegmenten")
+    workspace.save()
+    WorkspaceItem.objects.filter(pk=AREA_WORKSPACE_ITEM_ID).delete()
+    workspace_item = WorkspaceItem(
+        id=AREA_WORKSPACE_ITEM_ID,
+        adapter_class='adapter_rijnmond_areas',
+        workspace=workspace)
+    workspace_item.save()
+    logger.info("Added special workspace for rijnmond areas.")
 
 
 class Command(BaseCommand):
@@ -86,4 +80,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         shapefile_filename = args[0]
         load_shapefile(shapefile_filename)
-        # setup_special_workspaces()
+        setup_special_workspaces()
