@@ -1,5 +1,5 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
-from django.db import models
+from django.contrib.gis.db import models
 
 
 class Area(models.Model):
