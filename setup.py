@@ -13,7 +13,7 @@ install_requires = [
     'Django',
     'django-extensions',
     'django-nose',
-    'lizard-ui >= 3.0',
+    'lizard-ui',
     'pkginfo',
     ],
 
@@ -22,15 +22,15 @@ tests_require = [
 
 setup(name='lizard-rijnmond',
       version=version,
-      description="TODO",
+      description="Deltaportaal lizard-map plugin for Rijnmond-Drechtsteden",
       long_description=long_description,
       # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=['Programming Language :: Python',
                    'Framework :: Django',
                    ],
       keywords=[],
-      author='TODO',
-      author_email='TODO@nelen-schuurmans.nl',
+      author='Reinout van Rees',
+      author_email='reinout.vanrees@nelen-schuurmans.nl',
       url='',
       license='GPL',
       packages=['lizard_rijnmond'],
