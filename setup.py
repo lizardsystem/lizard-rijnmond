@@ -15,6 +15,7 @@ install_requires = [
     'django-nose',
     'lizard-ui',
     'pkginfo',
+    'xlrd',
     ]
 
 tests_require = [
