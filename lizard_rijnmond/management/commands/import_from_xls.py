@@ -104,7 +104,8 @@ class Command(BaseCommand):
                 for line in result:
                     riverline_result_data = RiverlineResultData(
                         riverline_result=riverline_result,
-                        level=line[level_field])
+                        level=line[level_field],
+                        location=line['locatie'])
                     riverline_result_data.save()
                     count += 1
                 logger.info("Saved %s results for %s", count, riverline_result)

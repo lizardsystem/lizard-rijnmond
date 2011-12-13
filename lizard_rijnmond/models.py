@@ -192,7 +192,9 @@ class RiverlineResultData(models.Model):
                                          blank=True,
                                          null=True)
     level = models.FloatField(blank=True, null=True)
-
+    location = models.CharField(max_length=128,
+                                null=True,
+                                blank=True)
 
 
 admin.site.register(Result)
@@ -200,6 +202,7 @@ admin.site.register(Measure)
 admin.site.register(Segment)
 admin.site.register(Riverline)
 admin.site.register(RiverlineResult)
+admin.site.register(RiverlineResultData)
 admin.site.register(Scenario)
 admin.site.register(Strategy)
 admin.site.register(Year)

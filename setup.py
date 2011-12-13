@@ -45,6 +45,7 @@ setup(name='lizard-rijnmond',
           ],
         'lizard_map.adapter_class': [
             'adapter_rijnmond_segments = lizard_rijnmond.layers:SegmentAdapter',
+            'adapter_rijnmond_riverlines = lizard_rijnmond.layers:RiverlineAdapter',
             ],
           },
       )

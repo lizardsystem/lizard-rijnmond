@@ -1,0 +1,57 @@
+{% extends "lizard_map/wms.html" %}
+{% load workspaces i18n %}
+
+{% block subtitle %}Maatgevend hoogwater{% endblock %}
+
+{% block sidebar %}
+<div class="sidebarbox sidebarbox-stretched"
+     id="accordion">
+  <h2>Scenario</h2>
+  <ul class="without-bullets pane accordion-load-next"
+      data-next-pane-id="#year-pane"
+      id="scenario-pane">
+    {% for scenario in scenarios %}
+    <li>
+      <a href="?scenario_id={{ scenario.id }}">{{ scenario.name }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  <h2>Zichtjaar</h2>
+  <ul class="without-bullets pane accordion-load-next"
+      data-next-pane-id="#strategy-pane"
+      id="year-pane">
+    {% for year in years %}
+    <li>
+      <a href="?scenario_id={{ scenario_id }}&year_id={{ year.id }}">{{ year.name }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  <h2>Strategie</h2>
+  <ul class="without-bullets pane accordion-load-next"
+      data-next-pane-id="#result-pane"
+      id="strategy-pane">
+    {% for strategy in strategies %}
+    <li>
+      <a href="?scenario_id={{ scenario_id }}&year_id={{ year_id }}&strategy_id={{ strategy.id }}">{{ strategy.name }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  <h2>Resultaten</h2>
+  <ul class="without-bullets pane"
+      id="result-pane">
+    {% for result in results %}
+    <li class="workspace-acceptable file"
+        data-name="{{ result }}"
+        data-adapter-class="adapter_rijnmond_riverlines"
+        data-adapter-layer-json='{"riverline_result_id": "{{ result.id }}"}'>
+      {{ result }}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% for workspace in workspaces.user %}
+  {% workspace workspace 0 %}
+{% empty %}
+No workspaces yet
+{% endfor %}
+{% endblock %}
