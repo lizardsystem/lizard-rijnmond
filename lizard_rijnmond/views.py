@@ -31,20 +31,21 @@ def water_level_map(request, template="lizard_rijnmond/water_level_map.html"):
     scenarios = Scenario.objects.all()
     years = Year.objects.all()
     strategies = Strategy.objects.all()
-    if strategy_id and scenario_id and year_id:
-        logger.debug("Filtering riverline_results")
-        results = RiverlineResult.objects.filter(
-            strategy=int(strategy_id),
-            scenario=int(scenario_id),
-            year=int(year_id))
-    else:
-        results = []
+    results = RiverlineResult.objects.all()
+    if strategy_id:
+        results = results.filter(strategy=int(strategy_id))
+    if scenario_id:
+        results = results.filter(scenario=int(scenario_id))
+    if year_id:
+        results = results.filter(year=int(year_id))
+    number_of_results = results.count()
     return render_to_response(
         template,
         {'scenarios': scenarios,
          'years': years,
          'strategies': strategies,
          'results': results,
+         'number_of_results': number_of_results,
          'scenario_id': scenario_id,
          'strategy_id': strategy_id,
          'year_id': year_id,

@@ -2,12 +2,17 @@
 import logging
 
 from django.conf import settings
-from lizard_map.coordinates import RD
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
+from lizard_map import coordinates
 from lizard_map.workspace import WorkspaceItemAdapter
 import mapnik
 
 from lizard_rijnmond.models import Riverline
 from lizard_rijnmond.models import RiverlineResult
+from lizard_rijnmond.models import RiverlineResultData
+
+MAX_SEARCH_RESULTS = 3
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +48,7 @@ class SegmentAdapter(WorkspaceItemAdapter):
             table=query,
             )
 
-        layer = mapnik.Layer("Segments", RD)
+        layer = mapnik.Layer("Segments", coordinates.RD)
         layer.datasource = datasource
         layer.styles.append("segmentadapterstyle")
         layers.append(layer)
@@ -139,10 +144,57 @@ class RiverlineAdapter(WorkspaceItemAdapter):
             table=str(query),
             )
 
-        layer = mapnik.Layer("Riverlines", RD)
+        layer = mapnik.Layer("Riverlines", coordinates.RD)
         layer.datasource = datasource
         layer.styles.append("riverlineadapterstyle")
         layers.append(layer)
 
         return layers, styles
 
+    def search(self, rd_x, rd_y, radius=None):
+        """Return closest cell.
+
+        What we return is in lizard-map's quite elaborate dict format,
+        but the main goal is that we return the identifier: a dict
+        with the cell id and the hydro model layer id.  The
+        ``.graph()`` and ``.html()`` methods use that identifier data.
+
+        """
+        # x, y = coordinates.google_to_rd(google_x, google_y)
+        logger.debug("Searching for cell near %s, %s with radius %s",
+                     rd_x, rd_y, radius)
+        # pt = Point(coordinates.rd_to_wgs84(x, y), 4326)
+        pt = Point((rd_x, rd_y), coordinates.RD)
+        logger.debug(pt)
+
+        results = RiverlineResultData.objects.filter(
+            riverline_result=int(self.riverline_result_id)).filter(
+            riverline__the_geom__distance_lte=(pt, D(m=radius)))
+        logger.debug("%s results", results.count())
+
+
+        # select riverline.the_geom, row.level as value
+        # from lizard_rijnmond_riverline riverline,
+        # lizard_rijnmond_riverlineresultdata row
+        # where riverline.verbose_code = row.location
+        # and row.riverline_result_id = %s
+
+        if True:
+            return []
+        result = [(distance(cell), cell) for cell in possible_cells]
+        if not result:
+            return []
+
+        result.sort(key=lambda item: item[0])
+        dist, cell = result[0]
+        logger.debug("Closest cell: %s", cell)
+
+        return [{'distance': dist,
+                 'name': 'not used',
+                 'workspace_item': self.workspace_item,
+                 'identifier': {
+                    'cell_id': cell.id,
+                    'hydro_model_layer_id': self.layer_arguments['hydro_model_layer_id'],
+                    },
+                 'google_coords': (x, y),
+                 'object': cell}]

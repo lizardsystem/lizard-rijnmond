@@ -109,3 +109,5 @@ class Command(BaseCommand):
                     riverline_result_data.save()
                     count += 1
                 logger.info("Saved %s results for %s", count, riverline_result)
+            else:
+                logger.warn("No MHW in %s, not handling yet", filename)

@@ -1,4 +1,6 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
+import logging
+
 from django.contrib.gis.db import models
 from django.contrib import admin
 from django.utils.translation import ugettext as _
@@ -6,6 +8,7 @@ from django.utils.translation import ugettext as _
 TIME_MAPPING = (
     (50, '2050'),
     (100, '2100'))
+logger = logging.getLogger(__name__)
 
 
 class Segment(models.Model):
@@ -196,6 +199,20 @@ class RiverlineResultData(models.Model):
     location = models.CharField(max_length=128,
                                 null=True,
                                 blank=True)
+    riverline = models.ForeignKey(Riverline,
+                                  blank=True,
+                                  null=True)
+
+    def save(self, *args, **kwargs):
+        riverlines = Riverline.objects.filter(verbose_code=self.location)
+        if len(riverlines) > 1:
+            logger.debug("Riverline for %s found multiple times.", self.location)
+        if len(riverlines) == 0:
+            logger.warn("Riverline for %s not found.", self.location)
+        else:
+            riverline = riverlines[0]
+            self.riverline = riverline
+        super(RiverlineResultData, self).save(*args, **kwargs)
 
 
 admin.site.register(Result)
