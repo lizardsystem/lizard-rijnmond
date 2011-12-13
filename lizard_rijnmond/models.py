@@ -50,6 +50,49 @@ class Segment(models.Model):
         verbose_name_plural = _('Dike segments')
 
 
+class Riverline(models.Model):
+    """Riverlines from riverline shapefile (river centerlines).
+
+    Columns from the ``.dbf``::
+
+        ITEM1,C,50
+        ITEM2,C,50
+
+    The ``mapping`` attribute on this class maps the column names to our
+    fields. Used by the import_rd_river_shapefile management command.
+
+    """
+    mapping = {
+        'code': 'ITEM1',
+        'name': 'ITEM2',
+        }
+    code = models.CharField(max_length=30,
+                            null=True,
+                            blank=True)
+    name = models.CharField(max_length=50,
+                            null=True,
+                            blank=True)
+    verbose_code = models.CharField(max_length=128,
+                                    null=True,
+                                    blank=True)
+
+    the_geom = models.LineStringField(srid=4326)
+    objects = models.GeoManager()
+
+    def __unicode__(self):
+        return self.verbose_code
+
+    class Meta:
+        verbose_name = _('Dike riverline')
+        verbose_name_plural = _('Dike riverlines')
+
+    def save(self, *args, **kwargs):
+        km = self.code.split('_')[1]
+        km = int(float(km))
+        self.verbose_code = '%s km %4d' % (self.name, km)
+        super(Riverline, self).save(*args, **kwargs)
+
+
 class Measure(models.Model):
     code = models.CharField(max_length=50,
                             null=True,
@@ -84,6 +127,79 @@ class Result(models.Model):
         verbose_name_plural = _('Results')
 
 
+class Scenario(models.Model):
+    name = models.CharField(max_length=20,
+                            null=True,
+                            blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Scenario')
+        verbose_name_plural = _('Scenarios')
+
+
+class Strategy(models.Model):
+    name = models.CharField(max_length=128,
+                            null=True,
+                            blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Strategy')
+        verbose_name_plural = _('Strategies')
+
+
+class Year(models.Model):
+    name = models.CharField(max_length=20,
+                            null=True,
+                            blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Year')
+        verbose_name_plural = _('Years')
+
+
+class RiverlineResult(models.Model):
+    strategy = models.ForeignKey(Strategy,
+                                blank=True,
+                                null=True)
+    scenario = models.ForeignKey(Scenario,
+                                 blank=True,
+                                 null=True)
+    year = models.ForeignKey(Year,
+                             blank=True,
+                             null=True)
+
+    def __unicode__(self):
+        return u'Result for %s and %s at %s' % (self.strategy,
+                                                self.scenario,
+                                                self.year)
+
+    class Meta:
+        verbose_name = _('Result')
+        verbose_name_plural = _('Results')
+
+
+class RiverlineResultData(models.Model):
+    riverline_result = models.ForeignKey(RiverlineResult,
+                                         blank=True,
+                                         null=True)
+    level = models.FloatField(blank=True, null=True)
+
+
+
 admin.site.register(Result)
 admin.site.register(Measure)
 admin.site.register(Segment)
+admin.site.register(Riverline)
+admin.site.register(RiverlineResult)
+admin.site.register(Scenario)
+admin.site.register(Strategy)
+admin.site.register(Year)
