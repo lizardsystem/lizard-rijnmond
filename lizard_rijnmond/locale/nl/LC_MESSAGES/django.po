@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-09 08:19-0600\n"
+"POT-Creation-Date: 2011-12-13 08:25-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,30 +18,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:48
+#: models.py:49
 msgid "Dike segment"
 msgstr "Dijkringsegment"
 
-#: models.py:49
+#: models.py:50
 msgid "Dike segments"
 msgstr "Dijkringsegmenten"
 
-#: models.py:61
+#: models.py:86
+msgid "Dike riverline"
+msgstr ""
+
+#: models.py:87
+msgid "Dike riverlines"
+msgstr ""
+
+#: models.py:108
 msgid "Measure"
 msgstr "Maatregel"
 
-#: models.py:62
+#: models.py:109 templates/lizard_rijnmond/segment_map.html:6
 msgid "Measures"
 msgstr "Maatregelen"
 
-#: models.py:68
+#: models.py:115
 msgid "Future date for which the result was calculated"
 msgstr "Datum in de toekomst waarvoor het resultaat is uitgerekend"
 
-#: models.py:76
+#: models.py:126 models.py:185
 msgid "Result"
 msgstr "Resultaat"
 
-#: models.py:77
+#: models.py:127 models.py:186
 msgid "Results"
 msgstr "Resultaten"
+
+#: models.py:139
+msgid "Scenario"
+msgstr "Scenario"
+
+#: models.py:140
+msgid "Scenarios"
+msgstr "Scenario's"
+
+#: models.py:152
+msgid "Strategy"
+msgstr "Strategie"
+
+#: models.py:153
+msgid "Strategies"
+msgstr "Strategiën"
+
+#: models.py:165
+msgid "Year"
+msgstr "Jaar"
+
+#: models.py:166
+msgid "Years"
+msgstr "Jaren"
+
+#: models.py:181
+#, python-format
+msgid "Result for %(strategy)s and %(scenario)s at %(year)s"
+msgstr "Resultaat voor %(strategy)s en %(scenario)s in %(year)s"

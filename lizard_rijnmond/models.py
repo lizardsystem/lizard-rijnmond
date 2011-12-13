@@ -178,9 +178,10 @@ class RiverlineResult(models.Model):
                              null=True)
 
     def __unicode__(self):
-        return u'Result for %s and %s at %s' % (self.strategy,
-                                                self.scenario,
-                                                self.year)
+        return _('Result for %(strategy)s and %(scenario)s at %(year)s') % {
+            'strategy': self.strategy,
+            'scenario': self.scenario,
+            'year': self.year}
 
     class Meta:
         verbose_name = _('Result')
