@@ -57,6 +57,43 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         super(RiverlineAdapter, self).__init__(*args, **kwargs)
         self.riverline_result_id = self.layer_arguments['riverline_result_id']
 
+    def _ranges(self):
+        """Return (from, to, blueness) for legend.
+
+        Range we handle is from 0 to 10 in 1 m steps.
+
+        """
+        result = []
+        result.append((None, 0, 0))
+        for i in range(10):
+            from_ = i
+            to_ = i + 1
+            blueness = 10 + 245/10 * i
+            result.append((from_, to_, blueness))
+        result.append((to_, None, 255))
+        return result
+
+    def legend(self, updates=None):
+        result = []
+        icon_style_template = {'icon': 'empty.png',
+                               'mask': ('empty_mask.png',),
+                               'color': (1, 1, 1, 1)}
+        for from_, to_, blueness in self._ranges():
+            icon_style = icon_style_template.copy()
+            icon_style.update({
+                    'color': (0, 0, blueness / 255.0, 1)})
+            img_url = self.symbol_url(icon_style=icon_style)
+            description = ''
+            if from_ is not None:
+                description += '%s < ' % from_
+            description += 'MHW'
+            if to_ is not None:
+                description += ' < %s' % to_
+            legend_row = {'img_url': img_url,
+                          'description': description}
+            result.append(legend_row)
+        return result
+
     def layer(self, layer_ids=None, request=None):
         """Return mapnik layers and styles."""
         layers = []
@@ -65,11 +102,15 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         styles["riverlineadapterstyle"] = style
 
 
-        for i in range(100):
+        for from_, to_, blueness in self._ranges():
             rule = mapnik.Rule()
-            rule.filter = mapnik.Filter("[value] > %s and [value] < %s" % (
-                    i / 10.0, i / 10.0 + 1))
-            blueness = 50 + 2 * i
+            if from_ is None:
+                rule.filter = mapnik.Filter("[value] < %s" % to_)
+            elif to_ is None:
+                rule.filter = mapnik.Filter("[value] > %s" % from_)
+            else:
+                rule.filter = mapnik.Filter("[value] > %s and [value] < %s" % (
+                        from_, to_))
             symbol = mapnik.LineSymbolizer(mapnik.Color(0, 0, blueness), 3)
             rule.symbols.append(symbol)
             style.rules.append(rule)
@@ -80,7 +121,6 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         symbol = mapnik.LineSymbolizer(mapnik.Color(100, 100, 100), 3)
         rule.symbols.append(symbol)
         style.rules.append(rule)
-
 
         query = """(
             select riverline.the_geom, row.level as value
