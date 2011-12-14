@@ -1,0 +1,29 @@
+<style type="text/css">
+table#well {
+  width: 50%;
+  margin-top: 0.5em;
+}
+table#well td:nth-child(odd) {
+  text-align: left;
+}
+table#well td:nth-child(even) {
+  text-align: right;
+}
+</style>
+<h2>{{ title }}</h2>
+<table id="well">
+  <thead>
+    <tr>
+      <th>Riviervak</th>
+      <th>Niveau</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for riverline_result_data in display_group %}
+    <tr>
+      <td>{{ riverline_result_data.riverline.verbose_code }}</td>
+      <td>{{ riverline_result_data.level }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>

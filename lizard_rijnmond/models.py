@@ -90,9 +90,15 @@ class Riverline(models.Model):
         verbose_name_plural = _('Dike riverlines')
 
     def save(self, *args, **kwargs):
-        km = self.code.split('_')[1]
-        km = int(float(km))
-        self.verbose_code = '%s km %4d' % (self.name, km)
+        orig_km = self.code.split('_')[1]
+        km = int(float(orig_km))
+        if km == float(orig_km):
+            # .000 kms
+            verbose_code = '%s km %4d' % (self.name, km)
+        else:
+            # .500 kms, don't really do anything.
+            verbose_code = '%s km %s' % (self.name, orig_km)
+        self.verbose_code = verbose_code
         super(Riverline, self).save(*args, **kwargs)
 
 
@@ -204,6 +210,7 @@ class RiverlineResultData(models.Model):
                                   null=True)
 
     def save(self, *args, **kwargs):
+        self.location = self.location
         riverlines = Riverline.objects.filter(verbose_code=self.location)
         if len(riverlines) > 1:
             logger.debug("Riverline for %s found multiple times.", self.location)

@@ -151,7 +151,7 @@ class RiverlineAdapter(WorkspaceItemAdapter):
 
         return layers, styles
 
-    def search(self, rd_x, rd_y, radius=None):
+    def search(self, google_x, google_y, radius=None):
         """Return closest cell.
 
         What we return is in lizard-map's quite elaborate dict format,
@@ -161,40 +161,63 @@ class RiverlineAdapter(WorkspaceItemAdapter):
 
         """
         # x, y = coordinates.google_to_rd(google_x, google_y)
+        radius = radius * 15
         logger.debug("Searching for cell near %s, %s with radius %s",
-                     rd_x, rd_y, radius)
+                     google_x, google_y, radius)
         # pt = Point(coordinates.rd_to_wgs84(x, y), 4326)
-        pt = Point((rd_x, rd_y), coordinates.RD)
+        # pt = Point((google_x, google_y), coordinates.GOOGLE)
+        #pt = Point(coordinates.google_to_wgs84(google_x, google_y), 4326)
+        pt = Point(coordinates.google_to_rd(google_x, google_y), coordinates.RD)
         logger.debug(pt)
+        rls = []
+        for rl in Riverline.objects.all().centroid():
+            distance = (rl.centroid.x - pt.x) ** 2 + (rl.centroid.y - pt.y) ** 2
+            distance = distance ** 0.5
+            rl.distance = distance
+            rls.append(rl)
+        rls.sort(cmp=lambda x, y: cmp(x.distance, y.distance))
+        matching_riverlines = rls[:3]
 
-        results = RiverlineResultData.objects.filter(
+        # matching_riverlines = Riverline.objects.filter(
+        #     the_geom__distance_lte=(pt, D(m=radius))).distance(pt).order_by(
+        #     'distance')
+        logger.debug("Found %s matching riverlines.",
+                     len(matching_riverlines))
+        for rl in matching_riverlines:
+            logger.debug("%s", rl.verbose_code)
+        logger.debug("Searching for result data for riverline result %s",
+                     self.riverline_result_id)
+        riverline_result_datas = RiverlineResultData.objects.filter(
             riverline_result=int(self.riverline_result_id)).filter(
-            riverline__the_geom__distance_lte=(pt, D(m=radius)))
-        logger.debug("%s results", results.count())
+            riverline__in=matching_riverlines)
+        logger.debug("%s matching riverlinedata results",
+                     riverline_result_datas.count())
+        result = []
+        for matching_riverline in matching_riverlines:
+            for riverline_result_data in riverline_result_datas:
+                if not riverline_result_data.riverline == matching_riverline:
+                    continue
+                result.append({'distance': matching_riverline.distance,
+                               'name': 'not used',
+                               'workspace_item': self.workspace_item,
+                               'identifier': {'riverline_result_data_id':
+                                                  riverline_result_data.id},
+                               'google_coords': (google_x, google_y),
+                               'object': riverline_result_data})
+        return result
 
+    def html(self, snippet_group=None, identifiers=None, layout_options=None):
+        """
+        """
+        return super(RiverlineAdapter, self).html_default(
+            snippet_group=snippet_group,
+            identifiers=identifiers,
+            layout_options=layout_options,
+            template="lizard_rijnmond/riverline_result_data_popup.html",
+            extra_render_kwargs=identifiers[0]
+        )
 
-        # select riverline.the_geom, row.level as value
-        # from lizard_rijnmond_riverline riverline,
-        # lizard_rijnmond_riverlineresultdata row
-        # where riverline.verbose_code = row.location
-        # and row.riverline_result_id = %s
-
-        if True:
-            return []
-        result = [(distance(cell), cell) for cell in possible_cells]
-        if not result:
-            return []
-
-        result.sort(key=lambda item: item[0])
-        dist, cell = result[0]
-        logger.debug("Closest cell: %s", cell)
-
-        return [{'distance': dist,
-                 'name': 'not used',
-                 'workspace_item': self.workspace_item,
-                 'identifier': {
-                    'cell_id': cell.id,
-                    'hydro_model_layer_id': self.layer_arguments['hydro_model_layer_id'],
-                    },
-                 'google_coords': (x, y),
-                 'object': cell}]
+    def location(self, riverline_result_data_id=None, layout=None):
+        logger.debug("Returning riverline result data for %s",
+                     riverline_result_data_id)
+        return RiverlineResultData.objects.get(pk=riverline_result_data_id)
