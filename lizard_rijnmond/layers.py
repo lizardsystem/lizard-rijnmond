@@ -61,21 +61,40 @@ class RiverlineAdapter(WorkspaceItemAdapter):
     def __init__(self, *args, **kwargs):
         super(RiverlineAdapter, self).__init__(*args, **kwargs)
         self.riverline_result_id = self.layer_arguments['riverline_result_id']
+        self.riverline_result = RiverlineResult.objects.get(
+            pk=self.riverline_result_id)
 
-    def _ranges(self):
+    def _reference_ranges(self):
         """Return (from, to, blueness) for legend.
 
         Range we handle is from 0 to 10 in 1 m steps.
 
         """
         result = []
-        result.append((None, 0, 0))
+        for i in range(20):
+            from_ = 0.5 * i
+            to_ = from_ + 0.5
+            blueness = int(10 + 245/20 * i)
+            color = (0, 0, blueness)
+            result.append((from_, to_, color))
+        result.append((to_, None, color))
+        return result
+
+    def _ranges(self):
+        result = []
         for i in range(10):
-            from_ = i
-            to_ = i + 1
-            blueness = 10 + 245/10 * i
-            result.append((from_, to_, blueness))
-        result.append((to_, None, 255))
+            from_ = -100 + 10 * i
+            to_ = from_ + 10
+            redness = 0 + 18 * i
+            color = (255, redness, redness)
+            result.append((from_, to_, color))
+        for i in range(10):
+            from_ = 10 * i
+            to_ = from_ + 10
+            greenness = 180 - 18 * i
+            color = (greenness, 255, greenness)
+            result.append((from_, to_, color))
+        print result
         return result
 
     def legend(self, updates=None):
@@ -83,10 +102,17 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         icon_style_template = {'icon': 'empty.png',
                                'mask': ('empty_mask.png',),
                                'color': (1, 1, 1, 1)}
-        for from_, to_, blueness in self._ranges():
+        if self.riverline_result.is_reference:
+            range_method = self._reference_ranges
+        else:
+            range_method = self._ranges
+        for from_, to_, color in range_method():
             icon_style = icon_style_template.copy()
+            color = (color[0] /255.0,
+                     color[1] /255.0,
+                     color[2] /255.0)
             icon_style.update({
-                    'color': (0, 0, blueness / 255.0, 1)})
+                    'color': color})
             img_url = self.symbol_url(icon_style=icon_style)
             description = ''
             if from_ is not None:
@@ -106,8 +132,13 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         style = mapnik.Style()
         styles["riverlineadapterstyle"] = style
 
-
-        for from_, to_, blueness in self._ranges():
+        if self.riverline_result.is_reference:
+            range_method = self._reference_ranges
+            level_field = 'level'
+        else:
+            range_method = self._ranges
+            level_field = 'relative_level'
+        for from_, to_, color in range_method():
             rule = mapnik.Rule()
             if from_ is None:
                 rule.filter = mapnik.Filter("[value] < %s" % to_)
@@ -116,7 +147,8 @@ class RiverlineAdapter(WorkspaceItemAdapter):
             else:
                 rule.filter = mapnik.Filter("[value] > %s and [value] < %s" % (
                         from_, to_))
-            symbol = mapnik.LineSymbolizer(mapnik.Color(0, 0, blueness), 3)
+            symbol = mapnik.LineSymbolizer(
+                mapnik.Color(color[0], color[1], color[2]), 3)
             rule.symbols.append(symbol)
             style.rules.append(rule)
 
@@ -128,12 +160,12 @@ class RiverlineAdapter(WorkspaceItemAdapter):
         style.rules.append(rule)
 
         query = """(
-            select riverline.the_geom, row.level as value
+            select riverline.the_geom, row.%s as value
             from lizard_rijnmond_riverline riverline,
             lizard_rijnmond_riverlineresultdata row
             where riverline.verbose_code = row.location
             and row.riverline_result_id = %s
-        ) as data""" % self.riverline_result_id
+        ) as data""" % (level_field, self.riverline_result_id)
         logger.info(query)
         default_database = settings.DATABASES['default']
         datasource = mapnik.PostGIS(

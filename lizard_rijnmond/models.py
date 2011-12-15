@@ -177,8 +177,8 @@ class Year(models.Model):
 
 class RiverlineResult(models.Model):
     strategy = models.ForeignKey(Strategy,
-                                blank=True,
-                                null=True)
+                                 blank=True,
+                                 null=True)
     scenario = models.ForeignKey(Scenario,
                                  blank=True,
                                  null=True)
@@ -206,6 +206,7 @@ class RiverlineResultData(models.Model):
                                          blank=True,
                                          null=True)
     level = models.FloatField(blank=True, null=True)
+    relative_level = models.FloatField(blank=True, null=True)
     location = models.CharField(max_length=128,
                                 null=True,
                                 blank=True)
@@ -214,15 +215,15 @@ class RiverlineResultData(models.Model):
                                   null=True)
 
     def save(self, *args, **kwargs):
-        self.location = self.location
-        riverlines = Riverline.objects.filter(verbose_code=self.location)
-        if len(riverlines) > 1:
-            logger.debug("Riverline for %s found multiple times.", self.location)
-        if len(riverlines) == 0:
-            logger.warn("Riverline for %s not found.", self.location)
-        else:
-            riverline = riverlines[0]
-            self.riverline = riverline
+        if not self.riverline:
+            riverlines = Riverline.objects.filter(verbose_code=self.location)
+            if len(riverlines) > 1:
+                logger.debug("Riverline for %s found multiple times.", self.location)
+            if len(riverlines) == 0:
+                logger.warn("Riverline for %s not found.", self.location)
+            else:
+                riverline = riverlines[0]
+                self.riverline = riverline
         super(RiverlineResultData, self).save(*args, **kwargs)
 
 

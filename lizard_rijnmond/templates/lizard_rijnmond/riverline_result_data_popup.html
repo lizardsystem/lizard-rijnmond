@@ -15,13 +15,19 @@ table#well td:nth-child(even) {
   <thead>
     <tr>
       <th>Riviervak</th>
-      <th>Niveau</th>
+      <th>Relatief niveau (cm)</th>
+      <th>Niveau (m)</th>
     </tr>
   </thead>
   <tbody>
     {% for riverline_result_data in display_group %}
     <tr>
       <td>{{ riverline_result_data.riverline.verbose_code }}</td>
+      <td>
+        {% if riverline_result_data.relative_level %}
+        {{ riverline_result_data.relative_level }}
+        {% endif %}
+      </td>
       <td>{{ riverline_result_data.level }}</td>
     </tr>
     {% endfor %}
