@@ -99,6 +99,9 @@ class Command(BaseCommand):
                     strategy=Strategy.objects.get(name=row['strategie']),
                     scenario=Scenario.objects.get(name=row['klimaatscenario']),
                     year=Year.objects.get(name=row['zichtjaar']))
+                if 'REF' in filename:
+                    riverline_result.is_reference = True
+                    logger.info("%s is a reference result.", filename)
                 riverline_result.save()
                 count = 0
                 for line in result:

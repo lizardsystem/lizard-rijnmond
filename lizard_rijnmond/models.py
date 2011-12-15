@@ -86,8 +86,8 @@ class Riverline(models.Model):
         return self.verbose_code
 
     class Meta:
-        verbose_name = _('Dike riverline')
-        verbose_name_plural = _('Dike riverlines')
+        verbose_name = _('Riverline')
+        verbose_name_plural = _('Riverlines')
 
     def save(self, *args, **kwargs):
         orig_km = self.code.split('_')[1]
@@ -185,12 +185,16 @@ class RiverlineResult(models.Model):
     year = models.ForeignKey(Year,
                              blank=True,
                              null=True)
+    is_reference = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return _('Result for %(strategy)s and %(scenario)s at %(year)s') % {
+        result = _('Result for %(strategy)s and %(scenario)s at %(year)s') % {
             'strategy': self.strategy,
             'scenario': self.scenario,
             'year': self.year}
+        if self.is_reference:
+            result += _(' (reference)')
+        return result
 
     class Meta:
         verbose_name = _('Result')
