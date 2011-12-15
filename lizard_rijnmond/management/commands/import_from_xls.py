@@ -57,63 +57,63 @@ class Command(BaseCommand):
         base_dir = os.path.dirname(base_file)
         overview = self.rows_from_xls(base_file, 'Code')
 
-        # # Flush.
-        # Scenario.objects.all().delete()
-        # Strategy.objects.all().delete()
-        # Year.objects.all().delete()
-        # RiverlineResult.objects.all().delete()
+        # Flush.
+        Scenario.objects.all().delete()
+        Strategy.objects.all().delete()
+        Year.objects.all().delete()
+        RiverlineResult.objects.all().delete()
 
-        # scenarios = set([row['klimaatscenario'] for row in overview])
-        # for scenario_name in scenarios:
-        #     scenario = Scenario(name=scenario_name)
-        #     scenario.save()
-        # logger.info("Scenarios found: %s", scenarios)
-        # strategies = set([row['strategie'] for row in overview])
-        # for strategy_name in strategies:
-        #     strategy = Strategy(name=strategy_name)
-        #     strategy.save()
-        # logger.info("Strategies found: %s", strategies)
-        # years = set([row['zichtjaar'] for row in overview])
-        # for year_name in years:
-        #     year = Year(name=year_name)
-        #     year.save()
-        # logger.info("Years found: %s", years)
-        # for row in overview:
-        #     filename = os.path.join(base_dir, row['code'] + '.xls')
-        #     if not os.path.exists(filename):
-        #         logger.warn("%s does not exist", filename)
-        #         row['available'] = False
-        #         continue
-        #     logger.debug("%s exists", filename)
-        #     row['available'] = True
+        scenarios = set([row['klimaatscenario'] for row in overview])
+        for scenario_name in scenarios:
+            scenario = Scenario(name=scenario_name)
+            scenario.save()
+        logger.info("Scenarios found: %s", scenarios)
+        strategies = set([row['strategie'] for row in overview])
+        for strategy_name in strategies:
+            strategy = Strategy(name=strategy_name)
+            strategy.save()
+        logger.info("Strategies found: %s", strategies)
+        years = set([row['zichtjaar'] for row in overview])
+        for year_name in years:
+            year = Year(name=year_name)
+            year.save()
+        logger.info("Years found: %s", years)
+        for row in overview:
+            filename = os.path.join(base_dir, row['code'] + '.xls')
+            if not os.path.exists(filename):
+                logger.warn("%s does not exist", filename)
+                row['available'] = False
+                continue
+            logger.debug("%s exists", filename)
+            row['available'] = True
 
-        #     if 'MHW' in filename:
-        #         result = self.rows_from_xls(filename, 'ID')
-        #         if result is None:
-        #             continue
-        #         field_names = result[0].keys()
-        #         level_field = [field for field in field_names
-        #                        if field.startswith('waterstand')][0]
-        #         logger.debug("Water level field is %s", level_field)
-        #         riverline_result = RiverlineResult(
-        #             strategy=Strategy.objects.get(name=row['strategie']),
-        #             scenario=Scenario.objects.get(name=row['klimaatscenario']),
-        #             year=Year.objects.get(name=row['zichtjaar']))
-        #         if 'REF' in filename:
-        #             riverline_result.is_reference = True
-        #             logger.info("%s is a reference result.", filename)
-        #         riverline_result.save()
-        #         count = 0
-        #         for line in result:
-        #             riverline_result_data = RiverlineResultData(
-        #                 riverline_result=riverline_result,
-        #                 level=line[level_field],
-        #                 location=line['locatie'])
-        #             riverline_result_data.save()
-        #             count += 1
-        #         logger.info("Saved %s results for %s", count, riverline_result)
-        #     else:
-        #         logger.warn("No MHW in %s, not handling yet", filename)
+            if 'MHW' in filename:
+                result = self.rows_from_xls(filename, 'ID')
+                if result is None:
+                    continue
+                field_names = result[0].keys()
+                level_field = [field for field in field_names
+                               if field.startswith('waterstand')][0]
+                logger.debug("Water level field is %s", level_field)
+                riverline_result = RiverlineResult(
+                    strategy=Strategy.objects.get(name=row['strategie']),
+                    scenario=Scenario.objects.get(name=row['klimaatscenario']),
+                    year=Year.objects.get(name=row['zichtjaar']))
+                if 'REF' in filename:
+                    riverline_result.is_reference = True
+                    logger.info("%s is a reference result.", filename)
+                riverline_result.save()
+                count = 0
+                for line in result:
+                    riverline_result_data = RiverlineResultData(
+                        riverline_result=riverline_result,
+                        level=line[level_field],
+                        location=line['locatie'])
+                    riverline_result_data.save()
+                    count += 1
+                logger.info("Saved %s results for %s", count, riverline_result)
+            else:
+                logger.warn("No MHW in %s, not handling yet", filename)
 
         # Preprocess relative_level.
         for reference_result in RiverlineResult.objects.filter(is_reference=True):
