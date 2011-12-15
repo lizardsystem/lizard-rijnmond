@@ -2,8 +2,8 @@ Changelog of lizard-rijnmond
 ===================================================
 
 
-0.3 (unreleased)
-----------------
+0.2.1 (2011-12-15)
+------------------
 
 - Forgot to uncomment a piece of code I commented for testing...
 
