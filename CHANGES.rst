@@ -5,7 +5,7 @@ Changelog of lizard-rijnmond
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Forgot to uncomment a piece of code I commented for testing...
 
 
 0.2 (2011-12-15)
